@@ -25,13 +25,11 @@ let currentEditingId = null;
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', function() {
                     unlockUI();
-                    // 解锁成功后再删除临时密码
-                    sessionStorage.removeItem('tempMasterPassword');
+                    // 不删除临时密码，保持解锁状态
                 });
             } else {
                 unlockUI();
-                // 解锁成功后再删除临时密码
-                sessionStorage.removeItem('tempMasterPassword');
+                // 不删除临时密码，保持解锁状态
             }
         }
     }
@@ -196,6 +194,11 @@ function savePasswords() {
 function renderPasswords() {
     const passwordsList = document.getElementById('passwordsList');
     const emptyState = document.getElementById('emptyState');
+    
+    // 如果不在主页面，直接返回
+    if (!passwordsList || !emptyState) {
+        return;
+    }
     
     if (passwords.length === 0) {
         passwordsList.style.display = 'none';

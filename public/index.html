@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云端密码管理器</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 登录界面 -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1><i class="fas fa-lock"></i> 云端密码管理器</h1>
+                    <p>安全存储，多设备同步</p>
+                </div>
+                
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" placeholder="请输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="masterPassword">主密码</label>
+                        <input type="password" id="masterPassword" placeholder="请输入主密码" required>
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="login()" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </button>
+                        <button onclick="showRegister()" class="btn btn-secondary">
+                            <i class="fas fa-user-plus"></i> 注册新用户
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 注册界面 -->
+        <div id="registerScreen" class="screen">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1><i class="fas fa-user-plus"></i> 注册新用户</h1>
+                    <p>创建您的账户</p>
+                </div>
+                
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="newUsername">用户名</label>
+                        <input type="text" id="newUsername" placeholder="请输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newMasterPassword">主密码</label>
+                        <input type="password" id="newMasterPassword" placeholder="请输入主密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmMasterPassword">确认主密码</label>
+                        <input type="password" id="confirmMasterPassword" placeholder="请再次输入主密码" required>
+                    </div>
+                    <div class="form-actions">
+                        <button onclick="register()" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> 注册
+                        </button>
+                        <button onclick="showLogin()" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 返回登录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主界面 -->
+        <div id="mainScreen" class="screen">
+            <header class="main-header">
+                <div class="header-left">
+                    <h1><i class="fas fa-shield-alt"></i> 密码管理器</h1>
+                    <span class="user-info" id="userInfo"></span>
+                </div>
+                <div class="header-right">
+                    <button onclick="goToAddPassword()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> 添加密码
+                    </button>
+                    <button onclick="lockVault()" class="btn btn-secondary">
+                        <i class="fas fa-lock"></i> 锁定
+                    </button>
+                </div>
+            </header>
+
+            <div class="main-content">
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="搜索密码..." oninput="filterPasswords()">
+                    </div>
+                    <div class="search-actions">
+                        <button onclick="exportPasswords()" class="btn btn-secondary">
+                            <i class="fas fa-download"></i> 导出
+                        </button>
+                        <label for="importFile" class="btn btn-secondary">
+                            <i class="fas fa-upload"></i> 导入
+                        </label>
+                        <input type="file" id="importFile" accept=".json" onchange="importPasswords(event)" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="passwords-container">
+                    <div id="passwordsList" class="passwords-grid">
+                        <!-- 密码列表将通过JavaScript动态生成 -->
+                    </div>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>还没有密码</h3>
+                        <p>点击"添加密码"开始管理您的密码</p>
+                        <button onclick="goToAddPassword()" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 添加第一个密码
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script-cloud.js"></script>
+</body>
+</html> 
