@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>密码管理器</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 登录界面 -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-container">
+                <h1><i class="fas fa-lock"></i> 密码管理器</h1>
+                <p>请输入主密码来解锁您的密码库</p>
+                <div class="input-group">
+                    <input type="password" id="masterPassword" placeholder="主密码" required>
+                    <button onclick="unlockVault()" class="btn btn-primary">
+                        <i class="fas fa-unlock"></i> 解锁
+                    </button>
+                </div>
+                <div class="setup-section" id="setupSection" style="display: none;">
+                    <p>首次使用，请设置主密码：</p>
+                    <div class="input-group">
+                        <input type="password" id="newMasterPassword" placeholder="设置主密码" required>
+                        <input type="password" id="confirmMasterPassword" placeholder="确认主密码" required>
+                        <button onclick="setupMasterPassword()" class="btn btn-success">
+                            <i class="fas fa-save"></i> 设置密码
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主界面 -->
+        <div id="mainScreen" class="screen">
+            <header class="header">
+                <h1><i class="fas fa-shield-alt"></i> 密码管理器</h1>
+                <div class="header-actions">
+                    <button onclick="goToAddPassword()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> 添加密码
+                    </button>
+                    <button onclick="showAddPasswordModal()" class="btn btn-secondary" title="快速添加">
+                        <i class="fas fa-bolt"></i> 快速添加
+                    </button>
+                    <button onclick="exportPasswords()" class="btn btn-secondary">
+                        <i class="fas fa-file-export"></i> 导出
+                    </button>
+                    <label class="btn btn-secondary" style="margin:0;cursor:pointer;">
+                        <i class="fas fa-file-import"></i> 导入
+                        <input type="file" id="importFileInput" accept="application/json" style="display:none;" onchange="importPasswords(event)">
+                    </label>
+                    <button onclick="debugData()" class="btn btn-secondary" title="调试数据">
+                        <i class="fas fa-bug"></i>
+                    </button>
+                    <button onclick="lockVault()" class="btn btn-secondary">
+                        <i class="fas fa-lock"></i> 锁定
+                    </button>
+                </div>
+            </header>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="搜索密码..." oninput="filterPasswords()">
+                <i class="fas fa-search"></i>
+            </div>
+
+            <div class="passwords-container">
+                <div id="passwordsList" class="passwords-list">
+                    <!-- 密码条目将在这里动态生成 -->
+                </div>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-key"></i>
+                    <h3>还没有密码</h3>
+                    <p>点击"添加密码"开始管理您的密码</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加密码模态框 -->
+        <div id="addPasswordModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus"></i> 添加新密码</h2>
+                    <span class="close" onclick="closeAddPasswordModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="siteName">网站/应用名称 *</label>
+                        <input type="text" id="siteName" placeholder="例如：Google、GitHub、微信">
+                    </div>
+                    <div class="form-group">
+                        <label for="siteUrl">网站地址</label>
+                        <input type="url" id="siteUrl" placeholder="例如：https://www.google.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">用户名/邮箱 *</label>
+                        <input type="text" id="username" placeholder="用户名或邮箱地址">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码 *</label>
+                        <div class="password-input-group">
+                            <input type="password" id="password" placeholder="密码">
+                            <button onclick="generatePassword()" class="btn btn-secondary" title="生成随机密码">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                            <button onclick="togglePasswordVisibility('password')" class="btn btn-secondary" title="显示/隐藏密码">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">分类</label>
+                        <select id="category">
+                            <option value="">选择分类</option>
+                            <option value="社交">社交</option>
+                            <option value="工作">工作</option>
+                            <option value="购物">购物</option>
+                            <option value="银行">银行</option>
+                            <option value="游戏">游戏</option>
+                            <option value="学习">学习</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">备注</label>
+                        <textarea id="notes" placeholder="可选：添加备注信息"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="attachment">附件</label>
+                        <input type="file" id="attachment" accept="image/*" onchange="previewImage('attachment', 'attachmentPreview')">
+                        <div id="attachmentPreview" class="image-preview"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeAddPasswordModal()" class="btn btn-secondary">取消</button>
+                    <button onclick="savePassword()" class="btn btn-primary">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑密码模态框 -->
+        <div id="editPasswordModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-edit"></i> 编辑密码</h2>
+                    <span class="close" onclick="closeEditPasswordModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editSiteName">网站/应用名称 *</label>
+                        <input type="text" id="editSiteName" placeholder="例如：Google、GitHub、微信">
+                    </div>
+                    <div class="form-group">
+                        <label for="editSiteUrl">网站地址</label>
+                        <input type="url" id="editSiteUrl" placeholder="例如：https://www.google.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="editUsername">用户名/邮箱 *</label>
+                        <input type="text" id="editUsername" placeholder="用户名或邮箱地址">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPassword">密码 *</label>
+                        <div class="password-input-group">
+                            <input type="password" id="editPassword" placeholder="密码">
+                            <button onclick="generatePassword('edit')" class="btn btn-secondary" title="生成随机密码">
+                                <i class="fas fa-dice"></i>
+                            </button>
+                            <button onclick="togglePasswordVisibility('editPassword')" class="btn btn-secondary" title="显示/隐藏密码">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCategory">分类</label>
+                        <select id="editCategory">
+                            <option value="">选择分类</option>
+                            <option value="社交">社交</option>
+                            <option value="工作">工作</option>
+                            <option value="购物">购物</option>
+                            <option value="银行">银行</option>
+                            <option value="游戏">游戏</option>
+                            <option value="学习">学习</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editNotes">备注</label>
+                        <textarea id="editNotes" placeholder="可选：添加备注信息"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editAttachment">附件</label>
+                        <input type="file" id="editAttachment" accept="image/*" onchange="previewImage('editAttachment', 'editAttachmentPreview')">
+                        <div id="editAttachmentPreview" class="image-preview"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeEditPasswordModal()" class="btn btn-secondary">取消</button>
+                    <button onclick="updatePassword()" class="btn btn-primary">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
